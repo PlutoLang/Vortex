@@ -1,0 +1,100 @@
+local WRITE_ONLINE_CODE = [=================================================================[
+∘(⇡(10)▽(|x|->x%2==0)⍉⊂" ")
+]=================================================================]
+
+local symbols <const> = {
+	-- Keywords
+	["∵"] = "for ",
+	-- Functions
+	["∘"] = "print",
+	["⇡"] = "range",
+	["⋕"] = "tonumber",
+	["∠"] = "math.atan",
+	-- Constants
+	["π"] = "math.pi",
+	["∞"] = "math.maxinteger",
+	-- Methods
+	["⊂"] = ":concat",
+	["≡"] = ":foreach",
+	["▽"] = ":filter",
+	["¤"] = ":map",
+	["⍉"] = ":reorder()",
+	["∧"] = ":reduce",
+	["↧"] = ":reduce(math.min)",
+	["↥"] = ":reduce(math.max)",
+}
+
+-- Polyfills
+range ??= function(s, e, x = 1)
+	if e == nil then
+		assert(s ~= nil)
+		e = s
+		s = 1
+	end
+	local t = {}
+	for i = s, e, x do
+		t[#t + 1] = i
+	end
+	return t
+end
+table.reduce ??= function(t, f, x = 1)
+	local a = x
+	for t as v do
+		a = f(a, v)
+	end
+	return a
+end
+
+local function golfify(code)
+	for symbol, plain in symbols do
+		code = code:gsub(plain, symbol)
+	end
+	return code
+end
+
+local function ungolfify(code)
+	for symbol, plain in symbols do
+		code = code:gsub(symbol, plain)
+	end
+	return code
+end
+
+local function try_run(code)
+	code = ungolfify(code)
+	local chunk, err = load(code, arg[2])
+	if chunk then
+		chunk()
+	else
+		print(err)
+	end
+end
+
+if arg[-1] == "pluto" and arg[0] == "script.pluto" then
+	try_run(WRITE_ONLINE_CODE)
+elseif arg[1] == "run" and arg[2] then
+	local f <close> = io.open(arg[2], "rb")
+	if not f then
+		print("Failed to open file: "..arg[2])
+	else
+		local code = f:read("*a")
+		try_run(code)
+	end
+elseif arg[1] == "golfify" and arg[2] then
+	local f <close> = io.open(arg[2], "rb")
+	if not f then
+		print("Failed to open file: "..arg[2])
+	else
+		local code = f:read("*a")
+		print(golfify(code))
+	end
+elseif arg[1] == "ungolfify" and arg[2] then
+	local f <close> = io.open(arg[2], "rb")
+	if not f then
+		print("Failed to open file: "..arg[2])
+	else
+		local code = f:read("*a")
+		print(ungolfify(code))
+	end
+else
+	print("Syntax: pluto vortex.pluto [run|golfify|ungolfify] <script>")
+end
